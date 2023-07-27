@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+    <widget id="ReesMcIvor_ProjectorDistance" class="ReesMcIvor\ProjectorDistance\Block\Widget\Calculator">
+        <label translate="true">Projector Distance Widget</label>
+        <description translate="true">Displays projector distance calculator</description>
+        <parameters>
+            <parameter name="category_id" xsi:type="block" required="true" visible="true" sort_order="10" >
+                <label translate="true">Category</label>
+                <block class="Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser"/>
+            </parameter>
+        </parameters>
+    </widget>
+</widgets>
