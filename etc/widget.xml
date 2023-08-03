@@ -5,10 +5,16 @@
         <label translate="true">Projector Distance Widget</label>
         <description translate="true">Displays projector distance calculator</description>
         <parameters>
-            <parameter name="category_id" xsi:type="block" required="true" visible="true" sort_order="10" >
-                <label translate="true">Category</label>
+            <parameter name="projectors_category_id" xsi:type="block" required="true" visible="true" sort_order="10" >
+                <label translate="true">Projector Category</label>
                 <block class="Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser"/>
             </parameter>
+
+            <parameter name="screen_category_id" xsi:type="block" required="true" visible="true" sort_order="10" >
+                <label translate="true">Screen Category</label>
+                <block class="Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser"/>
+            </parameter>
+
         </parameters>
     </widget>
 </widgets>
