@@ -9,72 +9,85 @@ $projectors = $block->getJson($block->getProjectorProducts());
         screens: <?php echo $screens; ?>,
         selectedProjectorSKU: "",
         selectedScreenSKU: "",
-        selectedUnit: "mm",
+        outputtedUnit: "cm",
         selectedProjector: null,
         selectedScreen: null,
-        inputScreenSize: null,
-        projectedDistance: {
+        screenSize: null,
+        projectorThrow: {
             min: null,
             max: null
         },
-        selectProduct() {
+        unitConversion: {
+            "mm": 10,
+            "cm": 1,
+            "inches": 0.393701,
+            "meters": 0.01
+        },
+        precision: {
+            "mm": 0,
+            "cm": 1,
+            "inches": 1,
+            "meters": 2
+        },
+        handleProjectorSelect() {
             this.selectedProjector = this.projectors.find(product => product.sku === this.selectedProjectorSKU);
             this.selectedScreen = this.screens.find(screen => screen.sku === this.selectedScreenSKU);
+            if (this.selectedScreen) {
+                this.screenSize = this.selectedScreen.screen_width;
+            }
         },
-        handleScreenSizeInput() {
-            if (this.selectedProjector && this.inputScreenSize) {
-                this.projectedDistance.min = Math.round(this.inputScreenSize * this.selectedProjector.projector_throw_min);
-                this.projectedDistance.max = Math.round(this.inputScreenSize * this.selectedProjector.projector_throw_max);
+        handleScreenSelect() {
+            if (this.selectedProjector && this.screenSize) {
+                const conversionFactor = this.unitConversion[this.outputtedUnit];
+                const distanceInMeters = this.screenSize * this.selectedProjector.projector_throw_min * conversionFactor;
+
+                this.projectorThrow.min = distanceInMeters.toFixed(this.precision[this.outputtedUnit]);
+                this.projectorThrow.max = (this.screenSize * this.selectedProjector.projector_throw_max * conversionFactor).toFixed(this.precision[this.outputtedUnit]);
             }
         }
     }'
-         x-init="selectProduct"
+         x-init="projectors = <?php echo $projectors; ?>; screens = <?php echo $screens; ?>; handleProjectorSelect()"
     >
-        <select x-model="selectedProjectorSKU" @change="selectProduct">
+        <select x-model="selectedProjectorSKU" @change="handleProjectorSelect(); handleScreenSelect();">
             <option value="" disabled selected>Select a projector</option>
             <template x-for="(product, index) in projectors" :key="index">
                 <option :value="product.sku" x-text="product.sku"></option>
             </template>
         </select>
 
-        <!--
-        <select x-model="selectedScreenSKU" @change="selectProduct">
+        <select x-model="selectedScreenSKU" @change="handleProjectorSelect(); handleScreenSelect();">
             <option value="" disabled selected>Select a screen</option>
             <template x-for="(screen, index) in screens" :key="index">
-                <option :value="screen.sku" x-text="`${screen.sku} (Width: ${screen.width}, Height: ${screen.height})`"></option>
+                <option :value="screen.sku" x-text="`${screen.sku} (Width: ${screen.screen_width})`"></option>
             </template>
         </select>
-        -->
 
-        <select x-model="selectedUnit">
+        <select x-model="outputtedUnit" @change="handleScreenSelect">
             <option value="mm">Millimeters</option>
             <option value="cm">Centimeters</option>
             <option value="inches">Inches</option>
             <option value="meters">Meters</option>
         </select>
 
-        <form @submit.prevent="handleScreenSizeInput">
-            <label for="screenSize">Screen Size:</label>
-            <input id="screenSize" type="number" step="0.01" x-model="inputScreenSize">
-            <button type="submit">Submit</button>
+        <form>
+            <label for="screenSize">Screen Size (cm):</label>
+            <input id="screenSize" type="text" x-model="screenSize" @input="handleScreenSelect">
         </form>
 
         <div x-show="selectedProjector">
-            <!--
             <p>Name: <span x-text="selectedProjector.name"></span></p>
             <p>SKU: <span x-text="selectedProjector.sku"></span></p>
             <p>Min Throw: <span x-text="selectedProjector.projector_throw_min"></span></p>
             <p>Max Throw: <span x-text="selectedProjector.projector_throw_max"></span></p>
-            -->
-            <p x-show="projectedDistance.min && projectedDistance.max">For the given screen size, the projector can be placed between <span x-text="projectedDistance.min"></span> <span x-text="selectedUnit"></span> and <span x-text="projectedDistance.max"></span> <span x-text="selectedUnit"></span> away.</p>
+            <p x-show="projectorThrow.min && projectorThrow.max">For the given screen size, the projector can be placed between <span x-text="projectorThrow.min"></span> <span x-text="outputtedUnit"></span> and <span x-text="projectorThrow.max"></span> <span x-text="outputtedUnit"></span> away.</p>
         </div>
 
         <div x-show="selectedScreen">
             <h2>Selected Screen:</h2>
             <p>Name: <span x-text="selectedScreen.name"></span></p>
             <p>SKU: <span x-text="selectedScreen.sku"></span></p>
-            <p>Width: <span x-text="selectedScreen.width"></span></p>
-            <p>Height: <span x-text="selectedScreen.height"></span></p>
+            <p>Width: <span x-text="selectedScreen.screen_width"></span> cm</p>
+            <p>Height: <span x-text="selectedScreen.height"></span> cm</p>
         </div>
     </div>
 </div>

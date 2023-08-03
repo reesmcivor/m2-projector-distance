@@ -50,12 +50,38 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
 
         $productCollection = $this->_productCollectionFactory->create();
         $productCollection->addAttributeToSelect('*')->addCategoriesFilter(['in' => $categoryIds]);
-        return $productCollection;
+        $products = [];
+        foreach($productCollection as $product) {
+            if ($product->getTypeId() == "configurable") {
+                $products = array_merge($this->getChildProducts($product), $products);
+            } else {
+                $products[] = $this->getProductData($product);
+            }
+        }
+        return $products;
     }
 
     public function getProjectorProducts()
     {
-        return $this->getCategoryProducts( $this->getProjectorsCategoryId());
+        return $this->filterProjectorProjectorsWithValidThrows(
+            $this->getCategoryProducts( $this->getProjectorsCategoryId())
+        );
+    }
+
+    public function filterProjectorProjectorsWithValidThrows( $products )
+    {
+        foreach($products as $key => $product)
+        {
+            if (
+                empty($product['projector_throw_min']) || empty($product['projector_throw_max']) ||
+                !is_numeric($product['projector_throw_min']) || !is_numeric($product['projector_throw_max'])
+
+            ) {
+                unset($products[$key]);
+            }
+            //dd($product['projector_throw_min']);
+        }
+        return $products;
     }
 
     public function getScreenProducts()
@@ -63,11 +89,11 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
         return $this->getCategoryProducts( $this->getScreensCategoryId());
     }
 
-    public function getJson( $productCollection)
+    public function getJson( $productCollection )
     {
         $productData = [];
         foreach ($productCollection as $product) {
-            $productData[] = $this->getProductData( $product );
+            $productData[] = $this->getProductData($product);
         }
         return json_encode($productData);
     }
@@ -75,10 +101,28 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
     protected function getProductData( $product )
     {
         return array_filter([
-            'name' => $product->getName(),
-            'sku' => $product->getSku(),
-            'projector_throw_min' => $product->getData('projector_throw_min'),
-            'projector_throw_max' => $product->getData('projector_throw_max')
+            'name' => $product['name'],
+            'sku' => $product['sku'],
+            'projector_throw_min' => $product['projector_throw_min'],
+            'projector_throw_max' => $product['projector_throw_max'],
+            'screen_width' => $product['screen_width'],
         ]);
+    }
+
+    /**
+     * @param mixed $product
+     * @return void
+     */
+    protected function getChildProducts( mixed $product )
+    {
+
+        $simpleProducts = $this->_configurableProductType->getUsedProducts($product);
+        $simpleProductIds = [];
+        foreach ($simpleProducts as $simpleProduct) {
+            $simpleProductIds[] = $simpleProduct->getId();
+        }
+        return $this->_productCollectionFactory->create()->addIdFilter($simpleProductIds)
+            ->addAttributeToSelect('*')
+            ->toArray();
     }
 }
