@@ -5,14 +5,36 @@
         <label translate="true">Projector Distance Widget</label>
         <description translate="true">Displays projector distance calculator</description>
         <parameters>
-            <parameter name="projectors_category_id" xsi:type="block" required="true" visible="true" sort_order="10" >
+
+            <parameter name="heading" xsi:type="text" required="true" visible="true" sort_order="1">
+                <label>Heading</label>
+            </parameter>
+
+            <parameter name="screens" xsi:type="block" visible="true" required="true" sort_order="2">
+                <label translate="true">Select Screen Products</label>
+                <block class="ReesMcIvor\ProjectorDistance\Block\ProductChoice" />
+            </parameter>
+
+            <parameter name="projectors_category_id" xsi:type="block" required="true" visible="true" sort_order="3" >
                 <label translate="true">Projector Category</label>
                 <block class="Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser"/>
             </parameter>
 
-            <parameter name="screen_category_id" xsi:type="block" required="true" visible="true" sort_order="10" >
+            <parameter name="screen_category_id" xsi:type="block" required="true" visible="true" sort_order="4" >
                 <label translate="true">Screen Category</label>
                 <block class="Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser"/>
+            </parameter>
+
+            <parameter name="show_screen_width_input" xsi:type="select" visible="true" sort_order="5">
+                <label translate="true">Show Screen Width Input</label>
+                <options>
+                    <option name="yes" value="1" selected="true">
+                        <label translate="true">Yes</label>
+                    </option>
+                    <option name="no" value="0">
+                        <label translate="true">No</label>
+                    </option>
+                </options>
             </parameter>
 
         </parameters>

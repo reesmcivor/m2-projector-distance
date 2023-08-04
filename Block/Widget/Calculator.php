@@ -31,11 +31,6 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
         return str_replace("category/", "", $this->getData('projectors_category_id'));
     }
 
-    public function getScreensCategoryId()
-    {
-        return str_replace("category/", "", $this->getData('screen_category_id'));
-    }
-
     public function getCategoryProducts( $categoryId )
     {
         $category = $this->_categoryFactory->create()->load($categoryId);
@@ -86,7 +81,13 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
 
     public function getScreenProducts()
     {
-        return $this->getCategoryProducts( $this->getScreensCategoryId());
+        $screens = $this->_productCollectionFactory->create()
+            ->addAttributeToSelect('*')
+            ->addFieldToFilter('sku', ['in' => $this->getData('screens')])
+            ->addAttributeToFilter('screen_width', ['gt' => 0])
+            ->getData();
+
+        return $screens;
     }
 
     public function getJson( $productCollection )

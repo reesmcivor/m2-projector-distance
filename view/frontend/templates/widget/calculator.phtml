@@ -4,7 +4,7 @@ $projectors = $block->getJson($block->getProjectorProducts());
 ?>
 
 <div class="wrapper">
-    <div class="projector-distance-widget" x-data='{
+    <div class="projector-distance-widget inline-block" style="width: 300px" x-data='{
         projectors: <?php echo $projectors; ?>,
         screens: <?php echo $screens; ?>,
         selectedProjectorSKU: "",
@@ -48,46 +48,61 @@ $projectors = $block->getJson($block->getProjectorProducts());
     }'
          x-init="projectors = <?php echo $projectors; ?>; screens = <?php echo $screens; ?>; handleProjectorSelect()"
     >
-        <select x-model="selectedProjectorSKU" @change="handleProjectorSelect(); handleScreenSelect();">
-            <option value="" disabled selected>Select a projector</option>
-            <template x-for="(product, index) in projectors" :key="index">
-                <option :value="product.sku" x-text="product.sku"></option>
-            </template>
-        </select>
 
-        <select x-model="selectedScreenSKU" @change="handleProjectorSelect(); handleScreenSelect();">
-            <option value="" disabled selected>Select a screen</option>
-            <template x-for="(screen, index) in screens" :key="index">
-                <option :value="screen.sku" x-text="`${screen.sku} (Width: ${screen.screen_width})`"></option>
-            </template>
-        </select>
 
-        <select x-model="outputtedUnit" @change="handleScreenSelect">
-            <option value="mm">Millimeters</option>
-            <option value="cm">Centimeters</option>
-            <option value="inches">Inches</option>
-            <option value="meters">Meters</option>
-        </select>
+        <div class="flex flex-col justify-center items-center border border-grey-100 bg-grey-300 ">
+            <div class="pt-3">
+                <?php if($block->getData('heading')) : ?>
+                    <h4 class="text-xl p-0 m-0"><?php echo $block->getData('heading'); ?></h4>
+                <?php endif; ?>
+            </div>
 
-        <form>
-            <label for="screenSize">Screen Size (cm):</label>
-            <input id="screenSize" type="text" x-model="screenSize" @input="handleScreenSelect">
-        </form>
+            <div class="w-full p-3 pb-0">
+                <select x-model="selectedScreenSKU" @change="handleProjectorSelect(); handleScreenSelect();" class="w-full">
+                    <option value="" disabled selected>Select a screen</option>
+                    <template x-for="(screen, index) in screens" :key="index">
+                        <option :value="screen.sku" x-text="`${screen.sku} (Width: ${screen.screen_width})`"></option>
+                    </template>
+                </select>
+            </div>
 
-        <div x-show="selectedProjector">
-            <p>Name: <span x-text="selectedProjector.name"></span></p>
-            <p>SKU: <span x-text="selectedProjector.sku"></span></p>
-            <p>Min Throw: <span x-text="selectedProjector.projector_throw_min"></span></p>
-            <p>Max Throw: <span x-text="selectedProjector.projector_throw_max"></span></p>
-            <p x-show="projectorThrow.min && projectorThrow.max">For the given screen size, the projector can be placed between <span x-text="projectorThrow.min"></span> <span x-text="outputtedUnit"></span> and <span x-text="projectorThrow.max"></span> <span x-text="outputtedUnit"></span> away.</p>
-        </div>
+            <div class="w-full p-3 pb-0">
+                <select x-model="selectedProjectorSKU" @change="handleProjectorSelect(); handleScreenSelect();" class="w-full">
+                    <option value="" disabled selected>Select a projector</option>
+                    <template x-for="(product, index) in projectors" :key="index">
+                        <option :value="product.sku" x-text="product.sku"></option>
+                    </template>
+                </select>
+            </div>
 
-        <div x-show="selectedScreen">
-            <h2>Selected Screen:</h2>
-            <p>Name: <span x-text="selectedScreen.name"></span></p>
-            <p>SKU: <span x-text="selectedScreen.sku"></span></p>
-            <p>Width: <span x-text="selectedScreen.screen_width"></span> cm</p>
-            <p>Height: <span x-text="selectedScreen.height"></span> cm</p>
+            <div class="w-full p-3">
+                <select x-model="outputtedUnit" @change="handleScreenSelect" class="w-full">
+                    <option value="">Show mesaurements in</option>
+                    <option value="mm">Millimeters</option>
+                    <option value="cm" selected>Centimeters</option>
+                    <option value="inches">Inches</option>
+                    <option value="meters">Meters</option>
+                </select>
+            </div>
+
+            <?php if($block->getData('show_screen_width_input')) : ?>
+                <div>
+                    <label for="screenSize">Screen Size (cm):</label>
+                    <input id="screenSize" type="text" x-model="screenSize" @input="handleScreenSelect">
+                </div>
+            <?php endif; ?>
+
+            <div x-show="selectedProjector">
+                <div class="p-3 pt-0 text-center">
+                    <p x-show="projectorThrow.min && projectorThrow.max">
+                        For <span class="font-bold" x-text="selectedProjector.name"></span> the <span class="font-bold" x-text="selectedScreen.screen_width"></span>
+                        cm screen, the projector can be placed between
+                        <span class="font-bold" x-text="projectorThrow.min"></span> <span class="font-bold" x-text="outputtedUnit"></span> and
+                        <span class="font-bold" x-text="projectorThrow.max"></span> <span class="font-bold" x-text="outputtedUnit"></span> away.
+                    </p>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
