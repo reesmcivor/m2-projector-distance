@@ -123,12 +123,19 @@ $projectors = $block->getJson($block->getProjectorProducts());
         }
     });
 
+
     const projectorTrigger = document.querySelector('.projector-trigger');
     projectorTrigger.addEventListener('change', function(event) {
         const selectedOption = event.target.options[event.target.selectedIndex];
         let skuValue = selectedOption.getAttribute('data-sku');
         let targetSelector = document.querySelector(".projector-select");
         selectOption(targetSelector, selectedOption.getAttribute('data-sku'));
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var event = new Event('change');
+        if (screenTrigger) screenTrigger.dispatchEvent(event);
+        if (projectorTrigger) projectorTrigger.dispatchEvent(event);
     });
 
     // select the option only if the option value exists in the select
