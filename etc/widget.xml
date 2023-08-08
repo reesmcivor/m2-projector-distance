@@ -20,11 +20,6 @@
                 <block class="Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser"/>
             </parameter>
 
-            <parameter name="screen_category_id" xsi:type="block" required="true" visible="true" sort_order="4" >
-                <label translate="true">Screen Category</label>
-                <block class="Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser"/>
-            </parameter>
-
             <parameter name="show_screen_width_input" xsi:type="select" visible="true" sort_order="5">
                 <label translate="true">Show Screen Width Input</label>
                 <options>

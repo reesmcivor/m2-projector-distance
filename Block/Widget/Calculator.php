@@ -74,7 +74,6 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
             ) {
                 unset($products[$key]);
             }
-            //dd($product['projector_throw_min']);
         }
         return $products;
     }
@@ -116,7 +115,6 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
      */
     protected function getChildProducts( mixed $product )
     {
-
         $simpleProducts = $this->_configurableProductType->getUsedProducts($product);
         $simpleProductIds = [];
         foreach ($simpleProducts as $simpleProduct) {
