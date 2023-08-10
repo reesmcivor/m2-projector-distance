@@ -113,11 +113,11 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
     protected function getProductData( $product )
     {
         return array_filter([
-            'name' => $product['name'],
-            'sku' => $product['sku'],
-            'projector_throw_min' => $product['projector_throw_min'],
-            'projector_throw_max' => $product['projector_throw_max'],
-            'screen_width' => $product['screen_width'],
+            'name' => $product['name'] ?? "",
+            'sku' => $product['sku'] ?? "",
+            'projector_throw_min' => $product['projector_throw_min'] ?? "",
+            'projector_throw_max' => $product['projector_throw_max'] ?? "",
+            'screen_width' => $product['screen_width'] ?? "",
         ]);
     }
 

@@ -13,7 +13,7 @@ $currentSku = $block->getCurrentProductSku();
         currentSKU: "<?php echo $currentSku; ?>",
         selectedProjectorSKU: "",
         selectedScreenSKU: "",
-        outputtedUnit: "cm",
+        outputtedUnit: "meters",
         selectedProjector: null,
         selectedScreen: null,
         screenSize: null,
@@ -89,16 +89,6 @@ $currentSku = $block->getCurrentProductSku();
                 </select>
             </div>
 
-            <div class="w-full p-3">
-                <select x-model="outputtedUnit" @change="handleScreenSelect" class="w-full">
-                    <option value="">Show mesaurements in</option>
-                    <option value="mm">Millimeters</option>
-                    <option value="cm" selected>Centimeters</option>
-                    <option value="inches">Inches</option>
-                    <option value="meters">Meters</option>
-                </select>
-            </div>
-
             <?php if($block->getData('show_screen_width_input')) : ?>
                 <div>
                     <label for="screenSize">Screen Size (cm):</label>
@@ -108,13 +98,20 @@ $currentSku = $block->getCurrentProductSku();
 
             <div x-show="selectedProjector">
                 <div class="p-3 pt-0 text-center">
-                    <p x-show="projectorThrow.min && projectorThrow.max">
-                        For <span class="font-bold" x-text="selectedProjector && selectedProjector.name"></span> the <span class="font-bold" x-text="selectedScreen && selectedScreen.screen_width"></span>
-                        cm screen, the projector can be placed between
-                        <span class="font-bold" x-text="projectorThrow.min"></span> <span class="font-bold" x-text="outputtedUnit"></span> and
-                        <span class="font-bold" x-text="projectorThrow.max"></span> <span class="font-bold" x-text="outputtedUnit"></span> away.
+                    <p x-show="projectorThrow.min && projectorThrow.max" class="text-xl">
+                        Min: <span class="font-bold" x-text="projectorThrow.min"></span> <span class="font-bold" x-text="outputtedUnit"></span><br />
+                        Max: <span class="font-bold" x-text="projectorThrow.max"></span> <span class="font-bold" x-text="outputtedUnit"></span>
                     </p>
                 </div>
+            </div>
+
+            <div class="w-full p-3">
+                <select x-model="outputtedUnit" @change="handleScreenSelect" class="w-full">
+                    <option value="meters">Meters</option>
+                    <option value="mm">Millimeters</option>
+                    <option value="cm" selected>Centimeters</option>
+                    <option value="inches">Inches</option>
+                </select>
             </div>
 
         </div>
