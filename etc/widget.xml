@@ -10,7 +10,7 @@
                 <label>Heading</label>
             </parameter>
 
-            <parameter name="screens" xsi:type="block" visible="true" required="true" sort_order="2">
+            <parameter name="screens" xsi:type="block" visible="true" required="false" sort_order="2">
                 <label translate="true">Select Screen Products</label>
                 <block class="ReesMcIvor\ProjectorDistance\Block\ProductChoice" />
             </parameter>
@@ -23,10 +23,10 @@
             <parameter name="show_screen_width_input" xsi:type="select" visible="true" sort_order="5">
                 <label translate="true">Show Screen Width Input</label>
                 <options>
-                    <option name="yes" value="1" selected="true">
+                    <option name="yes" value="1">
                         <label translate="true">Yes</label>
                     </option>
-                    <option name="no" value="0">
+                    <option name="no" value="0" selected="true">
                         <label translate="true">No</label>
                     </option>
                 </options>

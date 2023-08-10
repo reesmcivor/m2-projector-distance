@@ -53,12 +53,12 @@ $projectors = $block->getJson($block->getProjectorProducts());
     >
 
 
-        <div class="flex flex-col justify-center items-center border border-grey-100 bg-grey-300 ">
-            <div class="pt-3">
-                <?php if($block->getData('heading')) : ?>
+        <div class="flex flex-col justify-center items-center border border-grey-100 bg-grey-300">
+            <?php if($block->getData('heading')) : ?>
+                <div class="pt-3">
                     <h4 class="text-xl p-0 m-0"><?php echo $block->getData('heading'); ?></h4>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
 
             <div class="w-full p-3 pb-0">
                 <select x-model="selectedScreenSKU" @change="handleProjectorSelect(); handleScreenSelect();" class="w-full screen-size-select">
