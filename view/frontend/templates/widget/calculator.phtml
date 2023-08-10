@@ -1,6 +1,7 @@
 <?php
 $screens = $block->getJson($block->getScreenProducts());
 $projectors = $block->getJson($block->getProjectorProducts());
+$currentSku = $block->getCurrentProductSku();
 ?>
 
 <div class="wrapper">
@@ -9,6 +10,7 @@ $projectors = $block->getJson($block->getProjectorProducts());
          x-data='{
         projectors: <?php echo $projectors; ?>,
         screens: <?php echo $screens; ?>,
+        currentSKU: "<?php echo $currentSku; ?>",
         selectedProjectorSKU: "",
         selectedScreenSKU: "",
         outputtedUnit: "cm",
@@ -31,7 +33,7 @@ $projectors = $block->getJson($block->getProjectorProducts());
             "inches": 1,
             "meters": 2
         },
-        handleProjectorSelect( sku = null) {
+        handleProjectorSelect( sku = null ) {
             this.selectedProjector = this.projectors.find(product => product.sku === this.selectedProjectorSKU);
             this.selectedScreen = this.screens.find(screen => screen.sku === this.selectedScreenSKU);
             if (this.selectedScreen) {
@@ -46,9 +48,18 @@ $projectors = $block->getJson($block->getProjectorProducts());
                 this.projectorThrow.min = distanceInMeters.toFixed(this.precision[this.outputtedUnit]);
                 this.projectorThrow.max = (this.screenSize * this.selectedProjector.projector_throw_max * conversionFactor).toFixed(this.precision[this.outputtedUnit]);
             }
+        },
+        initializeSelectedSKU() {
+            if (this.projectors.some(projector => projector.sku === this.currentSKU)) {
+                this.selectedProjectorSKU = this.currentSKU;
+            }
+            if (this.screens.some(screen => screen.sku === this.currentSKU)) {
+                this.selectedScreenSKU = this.currentSKU;
+            }
         }
     }'
-         x-init="handleProjectorSelect()"
+         x-init="initializeSelectedSKU();handleProjectorSelect()"
+
         x-ref="projectorDistanceWidget"
     >
 
@@ -64,7 +75,7 @@ $projectors = $block->getJson($block->getProjectorProducts());
                 <select x-model="selectedScreenSKU" @change="handleProjectorSelect(); handleScreenSelect();" class="w-full screen-size-select">
                     <option value="" disabled selected>Select a screen</option>
                     <template x-for="(screen, index) in screens" :key="index">
-                        <option :value="screen.sku" x-text="`${screen.sku} `"></option>
+                        <option :value="screen.sku" x-text="`${screen.sku}`" x-bind:selected="screen.sku === currentSKU"></option>
                     </template>
                 </select>
             </div>
@@ -72,8 +83,8 @@ $projectors = $block->getJson($block->getProjectorProducts());
             <div class="w-full p-3 pb-0">
                 <select x-model="selectedProjectorSKU" @change="handleProjectorSelect(); handleScreenSelect();" class="w-full projector-select">
                     <option value="" disabled selected>Select a projector</option>
-                    <template x-for="(product, index) in projectors" :key="index">
-                        <option :value="product.sku" x-text="product.sku"></option>
+                    <template x-for="(projector, index) in projectors" :key="index">
+                        <option :value="projector.sku" x-text="projector.sku" x-bind:selected="projector.sku === currentSKU"></option>
                     </template>
                 </select>
             </div>

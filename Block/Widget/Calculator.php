@@ -12,23 +12,35 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
 
     protected $_configurableProductType;
 
+    protected $_registry;
+
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollectionFactory,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurableProductType,
+        \Magento\Framework\Registry $registry,
         array $data = []
     ) {
         $this->_categoryFactory = $categoryFactory;
         $this->_productCollectionFactory = $productCollectionFactory;
         $this->_configurableProductType = $configurableProductType;
+        $this->_registry = $registry;
         parent::__construct($context, $data);
     }
-
 
     public function getProjectorsCategoryId()
     {
         return str_replace("category/", "", $this->getData('projectors_category_id'));
+    }
+
+    public function getCurrentProductSku()
+    {
+        $product = $this->_registry->registry('current_product');
+        if ($product) {
+            return $product->getSku();
+        }
+        return null;
     }
 
     public function getCategoryProducts( $categoryId )
