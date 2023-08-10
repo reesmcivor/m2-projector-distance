@@ -6,11 +6,11 @@
         <description translate="true">Displays projector distance calculator</description>
         <parameters>
 
-            <parameter name="heading" xsi:type="text" required="true" visible="true" sort_order="1">
+            <parameter name="heading" xsi:type="text" required="false" visible="true" sort_order="1">
                 <label>Heading</label>
             </parameter>
 
-            <parameter name="screens" xsi:type="block" visible="true" required="false" sort_order="2">
+            <parameter name="screens" xsi:type="block" visible="true" required="true" sort_order="2">
                 <label translate="true">Select Screen Products</label>
                 <block class="ReesMcIvor\ProjectorDistance\Block\ProductChoice" />
             </parameter>
