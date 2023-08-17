@@ -95,7 +95,7 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
         $screens = $this->_productCollectionFactory->create()
             ->addAttributeToSelect('*')
             ->addFieldToFilter('sku', ['in' => $this->getData('screens')])
-            ->addAttributeToFilter('screen_width', ['gt' => 0])
+            ->addAttributeToFilter('screen_viewable_width', ['gt' => 0])
             ->getData();
 
         return $screens;
@@ -117,7 +117,7 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
             'sku' => $product['sku'] ?? "",
             'projector_throw_min' => $product['projector_throw_min'] ?? "",
             'projector_throw_max' => $product['projector_throw_max'] ?? "",
-            'screen_width' => $product['screen_width'] ?? "",
+            'screen_viewable_width' => $product['screen_viewable_width'] ?? "",
         ]);
     }
 

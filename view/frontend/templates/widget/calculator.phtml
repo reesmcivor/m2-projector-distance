@@ -37,7 +37,7 @@ $currentSku = $block->getCurrentProductSku();
             this.selectedProjector = this.projectors.find(product => product.sku === this.selectedProjectorSKU);
             this.selectedScreen = this.screens.find(screen => screen.sku === this.selectedScreenSKU);
             if (this.selectedScreen) {
-                this.screenSize = this.selectedScreen.screen_width;
+                this.screenSize = this.selectedScreen.screen_viewable_width;
             }
         },
         handleScreenSelect( sku = null) {
@@ -97,11 +97,11 @@ $currentSku = $block->getCurrentProductSku();
             <?php endif ?>
 
             <div x-show="selectedProjector">
-                <div class="p-3 pt-0 text-center">
-                    <p x-show="projectorThrow.min && projectorThrow.max" class="text-xl">
+                <div class="p-3 pt-5 text-center">
+                    <span x-show="projectorThrow.min && projectorThrow.max" class="text-xl pb-0 mb-0">
                         Min: <span class="font-bold" x-text="projectorThrow.min"></span> <span class="font-bold" x-text="outputtedUnit"></span><br />
                         Max: <span class="font-bold" x-text="projectorThrow.max"></span> <span class="font-bold" x-text="outputtedUnit"></span>
-                    </p>
+                    </span>
                 </div>
             </div>
 
