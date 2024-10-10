@@ -5,8 +5,7 @@ $currentSku = $block->getCurrentProductSku();
 ?>
 
 <div class="wrapper">
-    <div class="projector-distance-widget inline-block"
-         style="width: 300px"
+    <div class="projector-distance-widget flex flex-1 w-full"
          x-data='{
         projectors: <?php echo $projectors; ?>,
         screens: <?php echo $screens; ?>,
@@ -19,7 +18,9 @@ $currentSku = $block->getCurrentProductSku();
         screenSize: null,
         projectorThrow: {
             min: null,
-            max: null
+            max: null,
+            minMeters: null,
+            maxMeters: null
         },
         unitConversion: {
             "mm": 10,
@@ -45,6 +46,14 @@ $currentSku = $block->getCurrentProductSku();
                 const conversionFactor = this.unitConversion[this.outputtedUnit];
                 const distanceInMeters = this.screenSize * this.selectedProjector.projector_throw_min * conversionFactor;
 
+                this.projectorThrow.minMeters = parseFloat(distanceInMeters.toFixed(this.precision[this.outputtedUnit]));
+                this.projectorThrow.maxMeters = parseFloat((this.screenSize * this.selectedProjector.projector_throw_max * conversionFactor).toFixed(this.precision[this.outputtedUnit]));
+
+                console.error("minMeters", this.projectorThrow.minMeters);
+                console.error("maxMeters", this.projectorThrow.maxMeters);
+
+                //this.maxMeters = this.projectorThrow.maxMeters;
+
                 this.projectorThrow.min = distanceInMeters.toFixed(this.precision[this.outputtedUnit]);
                 this.projectorThrow.max = (this.screenSize * this.selectedProjector.projector_throw_max * conversionFactor).toFixed(this.precision[this.outputtedUnit]);
             }
@@ -56,9 +65,25 @@ $currentSku = $block->getCurrentProductSku();
             if (this.screens.some(screen => screen.sku === this.currentSKU)) {
                 this.selectedScreenSKU = this.currentSKU;
             }
+        },
+        maxMeters: 10,
+        containerWidth: 0,
+        projectorWidth: 100,
+        initContainerWidth: function() {
+            this.containerWidth = this.$refs.container.offsetWidth;
+        },
+        calculateDistanceInPixels: function() {
+            let percentage = (100 / this.maxMeters) * parseFloat(this.projectorThrow?.maxMeters);
+
+            if(percentage > 100) percentage = 100;
+            if(percentage < 0) percentage = 0;
+
+            return percentage;
+
+
         }
     }'
-         x-init="initializeSelectedSKU();handleProjectorSelect()"
+         x-init="initializeSelectedSKU(); handleProjectorSelect(); initContainerWidth();"
 
         x-ref="projectorDistanceWidget"
     >
@@ -89,12 +114,21 @@ $currentSku = $block->getCurrentProductSku();
                 </select>
             </div>
 
+            <?php if(/*$block->getData('show_room_width_input')*/ 1 == 1) : ?>
+                <div>
+                    <label for="maxMeters">Room Length (cm):</label>
+                    <input id="maxMeters" type="text" x-model="maxMeters" />
+                </div>
+            <?php endif ?>
+
             <?php if($block->getData('show_screen_width_input')) : ?>
                 <div>
                     <label for="screenSize">Screen Size (cm):</label>
                     <input id="screenSize" type="text" x-model="screenSize" @input="handleScreenSelect">
                 </div>
             <?php endif ?>
+
+
 
             <div x-show="selectedProjector">
                 <div class="p-3 pt-5 text-center">
@@ -115,7 +149,78 @@ $currentSku = $block->getCurrentProductSku();
             </div>
 
         </div>
-    </div>
+
+        <div class="projector-diagram w-full h-[500px] bg-blue-100 relative" x-ref="container">
+
+            <!-- The Projector -->
+            <div
+                class="the-projector absolute h-[50px] w-[100px] bg-red-400"
+                style="right:0"
+                :style="{right: calculateDistanceInPixels() + '%'}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50" width="300" height="150">
+                    <!-- Body of the projector (upside down) -->
+                    <rect x="10" y="10" width="80" height="20" fill="#ccc" stroke="#000" stroke-width="1" transform="rotate(180, 50, 20)"/>
+
+                    <!-- Lens (upside down) -->
+                    <circle cx="80" cy="20" r="6" fill="blue" stroke="#000" stroke-width="1" transform="rotate(180, 80, 20)"/>
+
+                    <!-- Projector buttons (upside down) -->
+                    <rect x="20" y="12" width="5" height="5" fill="#666" transform="rotate(180, 22.5, 14.5)"/>
+                    <rect x="28" y="12" width="5" height="5" fill="#666" transform="rotate(180, 30.5, 14.5)"/>
+                    <rect x="36" y="12" width="5" height="5" fill="#666" transform="rotate(180, 38.5, 14.5)"/>
+
+                    <!-- Feet of the projector -->
+                    <rect x="15" y="8" width="10" height="2" fill="#000" transform="rotate(180, 20, 9)"/>
+                    <rect x="75" y="8" width="10" height="2" fill="#000" transform="rotate(180, 80, 9)"/>
+
+                    <!-- Light beam (upside down) -->
+                    <polygon points="85,20 100,15 100,25" fill="rgba(255, 255, 0, 0.4)" transform="rotate(180, 92.5, 20)"/>
+
+                    <!-- Label text -->
+                    <text x="10" y="35" font-family="Arial" font-size="5" fill="black">Projector (Upside Down)</text>
+                </svg>
+
+            </div>
+
+
+
+            <!-- Markers for distance -->
+            <div class="distance-markers absolute bottom-0 w-full h-[30px] bg-red-400">
+                <template x-for="n in Array.from({ length: Math.ceil(maxMeters) + 1 }, (_, i) => i).reverse()">
+                    <div class="marker absolute w-[1px] bg-black h-full"
+                         :style="{ left: `${((maxMeters - n) / maxMeters) * 100}%`, transform: 'translateX(-50%)' }">
+                        <span class="absolute top-full translate-y-2 text-sm" x-text="n === 0 ? '0m' : n + 'm'"></span>
+                    </div>
+                </template>
+            </div>
+
+
+            <div class="distance-markers absolute top-0 w-full h-[30px] flex justify-between bg-red-blue">
+                <div class="min-distance bg-red-300 h-10 absolute top-[30px]"
+                     :style="{ right:0, width: `${( (100 / maxMeters) * projectorThrow.maxMeters)}%` }">
+                </div>
+                <div class="min-distance bg-red-400 h-10 absolute"
+                     :style="{ right:0, width: `${( (100 / maxMeters) * projectorThrow.minMeters)}%` }">
+                </div>
+            </div>
+
+            <div class="distance-markers absolute bottom-0 w-full h-[30px] flex justify-between bg-red-blue">
+                <div class="min-distance bg-red-600 h-5 absolute bottom-[30px]"
+                     :style="{ right:0, width: `${( (100 / maxMeters) * projectorThrow.maxMeters)}%` }">
+                </div>
+                <div class="min-distance bg-red-700 h-5 absolute bottom-35px"
+                     :style="{ right:0, width: `${( (100 / maxMeters) * projectorThrow.minMeters)}%` }">
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+
+    </div><!-- end alpine widget -->
 </div>
 
 <script>
@@ -140,13 +245,10 @@ $currentSku = $block->getCurrentProductSku();
         selectOption(targetSelector, selectedOption.getAttribute('data-sku'));
     });
 
-
     document.addEventListener("DOMContentLoaded", function() {
-        setTimeout(function() {
-            let event = new Event('change');
-            if (screenTrigger) screenTrigger.dispatchEvent(event);
-            if (projectorTrigger) projectorTrigger.dispatchEvent(event);
-        }, 2000);
+        var event = new Event('change');
+        if (screenTrigger) screenTrigger.dispatchEvent(event);
+        if (projectorTrigger) projectorTrigger.dispatchEvent(event);
     });
 
     // select the option only if the option value exists in the select
@@ -160,4 +262,8 @@ $currentSku = $block->getCurrentProductSku();
         }
     }
 
+</script>
+
+<script>
+    screenTrigger.on("change", )
 </script>
