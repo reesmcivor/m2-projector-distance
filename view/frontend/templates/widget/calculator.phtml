@@ -8,56 +8,73 @@ $currentSku = $block->getCurrentProductSku();
     <div class="projector-distance-widget inline-block"
          style="width: 300px"
          x-data='{
-        projectors: <?php echo $projectors; ?>,
-        screens: <?php echo $screens; ?>,
-        currentSKU: "<?php echo $currentSku; ?>",
-        selectedProjectorSKU: "",
-        selectedScreenSKU: "",
-        outputtedUnit: "meters",
-        selectedProjector: null,
-        selectedScreen: null,
-        screenSize: null,
-        projectorThrow: {
-            min: null,
-            max: null
-        },
-        unitConversion: {
-            "mm": 10,
-            "cm": 1,
-            "inches": 0.393701,
-            "meters": 0.01
-        },
-        precision: {
-            "mm": 0,
-            "cm": 1,
-            "inches": 1,
-            "meters": 2
-        },
-        handleProjectorSelect( sku = null ) {
-            this.selectedProjector = this.projectors.find(product => product.sku === this.selectedProjectorSKU);
-            this.selectedScreen = this.screens.find(screen => screen.sku === this.selectedScreenSKU);
-            if (this.selectedScreen) {
-                this.screenSize = this.selectedScreen.screen_viewable_width;
-            }
-        },
-        handleScreenSelect( sku = null) {
-            if (this.selectedProjector && this.screenSize) {
-                const conversionFactor = this.unitConversion[this.outputtedUnit];
-                const distanceInMeters = this.screenSize * this.selectedProjector.projector_throw_min * conversionFactor;
+            projectors: <?php echo $projectors; ?>,
+            filteredProjectors: [],
+            screens: <?php echo $screens; ?>,
+            currentSKU: "<?php echo $currentSku; ?>",
+            selectedProjectorSKU: "",
+            selectedScreenSKU: "",
+            selectedManufacturer: "",
+            outputtedUnit: "meters",
+            selectedProjector: null,
+            selectedScreen: null,
+            screenSize: null,
+            projectorThrow: {
+                min: null,
+                max: null
+            },
+            unitConversion: {
+                "mm": 10,
+                "cm": 1,
+                "inches": 0.393701,
+                "meters": 0.01
+            },
+            precision: {
+                "mm": 0,
+                "cm": 1,
+                "inches": 1,
+                "meters": 2
+            },
+            handleProjectorSelect(sku = null) {
+                this.selectedProjector = this.filteredProjectors.find(product => product.sku === this.selectedProjectorSKU);
+                this.selectedScreen = this.screens.find(screen => screen.sku === this.selectedScreenSKU);
+                if (this.selectedScreen) {
+                    this.screenSize = this.selectedScreen.screen_viewable_width;
+                }
+            },
+            handleScreenSelect(sku = null) {
+                if (this.selectedProjector && this.screenSize) {
+                    const conversionFactor = this.unitConversion[this.outputtedUnit];
+                    const distanceInMeters = this.screenSize * this.selectedProjector.projector_throw_min * conversionFactor;
 
-                this.projectorThrow.min = distanceInMeters.toFixed(this.precision[this.outputtedUnit]);
-                this.projectorThrow.max = (this.screenSize * this.selectedProjector.projector_throw_max * conversionFactor).toFixed(this.precision[this.outputtedUnit]);
+                    this.projectorThrow.min = distanceInMeters.toFixed(this.precision[this.outputtedUnit]);
+                    this.projectorThrow.max = (this.screenSize * this.selectedProjector.projector_throw_max * conversionFactor).toFixed(this.precision[this.outputtedUnit]);
+                }
+            },
+            filterByManufacturer() {
+                if (!this.selectedManufacturer) {
+                    this.filteredProjectors = this.projectors;
+                } else {
+                    this.filteredProjectors = this.projectors.filter(p => p.manufacturer === this.selectedManufacturer);
+                }
+
+                if (!this.filteredProjectors.some(p => p.sku === this.selectedProjectorSKU)) {
+                    this.selectedProjectorSKU = "";
+                    this.selectedProjector = null;
+                }
+
+                this.handleScreenSelect();
+            },
+            initializeSelectedSKU() {
+                this.filteredProjectors = this.projectors;
+                if (this.projectors.some(projector => projector.sku === this.currentSKU)) {
+                    this.selectedProjectorSKU = this.currentSKU;
+                }
+                if (this.screens.some(screen => screen.sku === this.currentSKU)) {
+                    this.selectedScreenSKU = this.currentSKU;
+                }
             }
-        },
-        initializeSelectedSKU() {
-            if (this.projectors.some(projector => projector.sku === this.currentSKU)) {
-                this.selectedProjectorSKU = this.currentSKU;
-            }
-            if (this.screens.some(screen => screen.sku === this.currentSKU)) {
-                this.selectedScreenSKU = this.currentSKU;
-            }
-        }
-    }'
+        }'
          x-init="initializeSelectedSKU();handleProjectorSelect()"
 
         x-ref="projectorDistanceWidget"
@@ -81,9 +98,18 @@ $currentSku = $block->getCurrentProductSku();
             </div>
 
             <div class="w-full p-3 pb-0">
+                <select x-model="selectedManufacturer" @change="filterByManufacturer" class="w-full">
+                    <option value="">All Manufacturers</option>
+                    <template x-for="name in [...new Set(projectors.map(p => p.manufacturer))]" :key="name">
+                        <option :value="name" x-text="name"></option>
+                    </template>
+                </select>
+            </div>
+
+            <div class="w-full p-3 pb-0">
                 <select x-model="selectedProjectorSKU" @change="handleProjectorSelect(); handleScreenSelect();" class="w-full projector-select">
                     <option value="" disabled selected>Select a projector</option>
-                    <template x-for="(projector, index) in projectors" :key="index">
+                    <template x-for="(projector, index) in filteredProjectors" :key="index">
                         <option :value="projector.sku" x-text="projector.sku" x-bind:selected="projector.sku === currentSKU"></option>
                     </template>
                 </select>

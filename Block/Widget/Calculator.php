@@ -43,10 +43,10 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
         return null;
     }
 
-    public function getCategoryProducts( $categoryId )
-    {
+    public function getCategoryProducts($categoryId)
+{
         $category = $this->_categoryFactory->create()->load($categoryId);
-        $categoryIds = [$categoryId];  // Initialize with the selected category ID
+        $categoryIds = [$categoryId];
 
         $childCategories = $category->getChildrenCategories();
         if ($childCategories->count() > 0) {
@@ -57,22 +57,36 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
 
         $productCollection = $this->_productCollectionFactory->create();
         $productCollection->addAttributeToSelect('*')->addCategoriesFilter(['in' => $categoryIds]);
+
         $products = [];
-        foreach($productCollection as $product) {
+
+        foreach ($productCollection as $product) {
             if ($product->getTypeId() == "configurable") {
-                $products = array_merge($this->getChildProducts($product), $products);
+                $childProducts = $this->getChildProducts($product);
+                foreach ($childProducts as $childProduct) {
+                    $products[] = $this->getProductData($childProduct);
+                }
             } else {
                 $products[] = $this->getProductData($product);
             }
         }
+
         return $products;
     }
 
     public function getProjectorProducts()
     {
-        return $this->filterProjectorProjectorsWithValidThrows(
-            $this->getCategoryProducts( $this->getProjectorsCategoryId())
-        );
+        $categoryId = $this->getProjectorsCategoryId();
+        $category = $this->_categoryFactory->create()->load($categoryId);
+        $categoryIds = [$categoryId];
+
+        foreach ($category->getChildrenCategories() as $childCategory) {
+            $categoryIds[] = $childCategory->getId();
+        }
+
+        return $this->_productCollectionFactory->create()
+            ->addAttributeToSelect('*')
+            ->addCategoriesFilter(['in' => $categoryIds]);
     }
 
     public function filterProjectorProjectorsWithValidThrows( $products )
@@ -92,13 +106,10 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
 
     public function getScreenProducts()
     {
-        $screens = $this->_productCollectionFactory->create()
+        return $this->_productCollectionFactory->create()
             ->addAttributeToSelect('*')
             ->addFieldToFilter('sku', ['in' => $this->getData('screens')])
-            ->addAttributeToFilter('screen_viewable_width', ['gt' => 0])
-            ->getData();
-
-        return $screens;
+            ->addAttributeToFilter('screen_viewable_width', ['gt' => 0]);
     }
 
     public function getJson( $productCollection )
@@ -113,11 +124,12 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
     protected function getProductData( $product )
     {
         return array_filter([
-            'name' => $product['name'] ?? "",
-            'sku' => $product['sku'] ?? "",
-            'projector_throw_min' => $product['projector_throw_min'] ?? "",
-            'projector_throw_max' => $product['projector_throw_max'] ?? "",
-            'screen_viewable_width' => $product['screen_viewable_width'] ?? "",
+            'name' => $product->getName(),
+            'sku' => $product->getSku(),
+            'manufacturer' => $product->getAttributeText('manufacturer') ?? '',
+            'projector_throw_min' => $product->getData('projector_throw_min'),
+            'projector_throw_max' => $product->getData('projector_throw_max'),
+            'screen_viewable_width' => $product->getData('screen_viewable_width'),
         ]);
     }
 
@@ -125,15 +137,15 @@ class Calculator extends \Magento\Framework\View\Element\Template implements \Ma
      * @param mixed $product
      * @return void
      */
-    protected function getChildProducts( mixed $product )
+    protected function getChildProducts( mixed $product )   
     {
         $simpleProducts = $this->_configurableProductType->getUsedProducts($product);
         $simpleProductIds = [];
         foreach ($simpleProducts as $simpleProduct) {
             $simpleProductIds[] = $simpleProduct->getId();
         }
-        return $this->_productCollectionFactory->create()->addIdFilter($simpleProductIds)
-            ->addAttributeToSelect('*')
-            ->toArray();
+        return $this->_productCollectionFactory->create()
+            ->addIdFilter($simpleProductIds)
+            ->addAttributeToSelect('*');
     }
 }
